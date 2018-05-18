@@ -238,3 +238,7 @@ input[type=range]:focus::-ms-fill-upper {
     overflow: hidden;
     width: 70px;
 }
+
+.form-group1 {
+	padding-bottom: 8px;
+}
