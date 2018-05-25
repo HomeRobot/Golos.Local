@@ -107,9 +107,9 @@
 						
 						<div class="collapse navbar-collapse" id="collapse_navbar">
 							<ul class="nav navbar-nav">
-								<li class="item-120 default current"><a href="index.html" >Новое</a></li>
+								<li class="item-120 default current active"><a href="index.html" >Новое</a></li>
 								<li class="item-120 default current" id="popular"><a href="popular.html" >Популярное</a></li>
-								<li class="item-120 default current active" id="feed"><a href="feed.html" >Моя лента</a></li>
+								<li class="item-120 default current" id="feed"><a href="feed.html" >Моя лента</a></li>
 								<li class="item-120 default current" id="blog"><a href="blog.html" >Мой блог</a></li>
 								<li class="item-120 default current" id="post"><a href="post.html" >Новый пост</a></li>
 								<li class="item-120 default current" id="options" ><a href="options.html">Настройки</a></li>
@@ -122,7 +122,6 @@
 				</aside>
 				<div id="main_content_wrapper">
 					<section id="main_content">
-						
 						<div id="main_column_wrapper">
 							<div id="main_column">																	
 								<ol itemscope itemtype="https://schema.org/BreadcrumbList" class="breadcrumb">
@@ -131,7 +130,7 @@
 									</li>	
 									<li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem" class="active">
 										<span itemprop="name">
-											Главная				
+											Главная	/ <span id="atag"></span>			
 										</span>
 										<meta itemprop="position" content="1">
 									</li>
@@ -141,20 +140,23 @@
 									<img style="margin: auto;" id="loader" src="images/11.gif">
 									</div>
 									<script language="javascript" type="text/javascript">
-										var author = getUrlVars()['author'];
-										getDiscussionsByBlog(author);
+										var login = localStorage.getItem('login');
+										if(localStorage.getItem(login))
+										{
+											document.getElementById('login_div').style = 'display: none;';
+											document.getElementById('avatar').style = 'display:block';
+										}
+										else
+										{
+											document.getElementById('avatar').style = 'display:none';
+										}
+										var the_author = getUrlVars()['author'];												
+										var the_permlink = getUrlVars()['permlink'];												
+										getContentX(the_permlink, the_author);									
 									</script>
 
 									<div class="row">
-										<div class="col-lg-5" id="x5">
-											<nav class="">
-												<div class="collapse navbar-collapse" id="items_collapsable_wrapper">
-													<div id="items_list_wrapper" class="row">
-													</div>
-												</div>
-											</nav>
-										</div>
-										<div class="col-lg-7" id="x7">
+										<div class="col-lg-12">
 											<div id="item_content_wrapper">
 												<div style="margin: auto; text-align: -webkit-center;">
 													<img style="display: none;" id="content_loader" src="images/11.gif">
@@ -171,7 +173,7 @@
 														<input type="range" name="power" min="1" max="100" step="1" value="100" style="width: 240px; margin-top: 10px; margin-right: 10px;" onchange="document.getElementById('vpower').innerHTML = this.value"> 
 													</div>			
 													<div style="float:left;">
-														<button type="button" onClick="votePost(this.form.power.value, this.form.permlink.value, this.form.author.value; return false;">Оценить <span id="vpower">100</span>%</button>
+														<button type="button" onClick="votePost(this.form.power.value, this.form.permlink.value, this.form.author.value); return false;">Оценить <span id="vpower">100</span>%</button>
 													</div>
 													<input type="hidden" name="permlink" value="">
 													<input type="hidden" name="author" value="">

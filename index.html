@@ -32,7 +32,7 @@
 		<script src="js/marked.js" type="text/javascript"></script>
 		<script src="js/moment.js" type="text/javascript"></script>
 		<script src="js/goloshelper.js" type="text/javascript"></script>
-		<script src="js/config.js" type="text/javascript"></script>
+		
 		<script src="js/view.js" type="text/javascript"></script>
 		<script language="javascript" type="text/javascript"></script>
 	</head>
@@ -112,6 +112,8 @@
 								<li class="item-120 default current" id="feed"><a href="feed.html" >Моя лента</a></li>
 								<li class="item-120 default current" id="blog"><a href="blog.html" >Мой блог</a></li>
 								<li class="item-120 default current" id="post"><a href="post.html" >Новый пост</a></li>
+								<li class="item-120 default current" id="options" ><a href="options.html">Настройки</a></li>
+								<li class="item-120 default current" id="exit" ><a href="#" onClick="localStorage.clear(); location.reload();">Выход</a></li>
 								<li class="item-141 divider"><span class="separator ">разделитель</span></li>			
 							</ul>
 						</div>
@@ -143,7 +145,7 @@
 									</script>
 
 									<div class="row">
-										<div class="col-lg-5">
+										<div class="col-lg-5" id="x5">
 											<nav class="">
 												<div class="collapse navbar-collapse" id="items_collapsable_wrapper">
 													<div id="items_list_wrapper" class="row">
@@ -151,7 +153,7 @@
 												</div>
 											</nav>
 										</div>
-										<div class="col-lg-7">
+										<div class="col-lg-7" id="x7">
 											<div id="item_content_wrapper">
 												<div style="margin: auto; text-align: -webkit-center;">
 													<img style="display: none;" id="content_loader" src="images/11.gif">
@@ -225,16 +227,7 @@
 		<div class="clearfix"></div>
 		<script>
 			Init();
-										var login = localStorage.getItem('login');
-										if(localStorage.getItem(login))
-										{
-											document.getElementById('login_div').style = 'display: none;';
-											document.getElementById('avatar').style = 'display:block';
-										}
-										else
-										{
-											document.getElementById('avatar').style = 'display:none';
-										}
-										getDiscussions();		</script>
+			getDiscussions();		
+		</script>
 	</body>
 </html>

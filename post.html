@@ -33,7 +33,7 @@
 		<script src="js/marked.js" type="text/javascript"></script>
 		<script src="js/moment.js" type="text/javascript"></script>
 		<script src="js/goloshelper.js" type="text/javascript"></script>
-		<script src="js/config.js" type="text/javascript"></script>
+		
 		<script src="js/view.js" type="text/javascript"></script>
 		<script src="js/editormd.min.js" type="text/javascript"></script>
 		<script language="javascript" type="text/javascript"></script>
@@ -125,6 +125,8 @@
 								<li class="item-120 default current" id="feed"><a href="feed.html" >Моя лента</a></li>
 								<li class="item-120 default current" id="blog"><a href="blog.html" >Мой блог</a></li>
 								<li class="item-120 default current active" id="post" ><a href="post.html" >Новый пост</a></li>
+								<li class="item-120 default current" id="options" ><a href="options.html">Настройки</a></li>
+								<li class="item-120 default current" id="exit" ><a href="#" onClick="localStorage.clear(); location.reload();">Выход</a></li>
 								<li class="item-141 divider"><span class="separator ">разделитель</span></li>			
 							</ul>
 						</div>
@@ -148,13 +150,13 @@
 									</li>
 								</ol>
 																																																							<div id="j_component">									
-									<form action="index.html" method="post" name="adminForm" id="adminForm" class="form-validate col-sm-10 col-sm-offset-1">
+									<form action="index.html" method="post" name="postForm" id="postForm" class="form-validate col-sm-10 col-sm-offset-1">
 										<div class="form-group1">
 											<label for="title">Название<span style="color: red;">*</span> </label>
 											<input type="text" class="form-control required" id="title" name="title" required="required"> 
 										</div>
 										<div class="form-group1">
-											<label for="title">Картинка к посту (укажите URL)</label>
+											<label for="title">Картинка к посту (укажите URL)</label> (не дублируется в посте, показывается только в ленте)
 											<input type="text" class="form-control required" id="image" name="image"> 
 										</div>
 										<div class="form-group1">
@@ -165,10 +167,14 @@
 												<textarea style="display:none;" id="contentbody">Пора что-то написать...</textarea>
 											</div>
 										</div>
+										
 										<div class="form-group1">
 											<label for="tags">Тэги, через пробел<span style="color: red;">*</span> </label>
 											<input type="text" class="form-control required" id="tags" name="tags" required="required"> 
-										</div>				
+										</div>	
+										<div class="form-group1">
+											<a href="https://postimages.org/" target="_blank">Загрузка картинок...</a> 
+										</div>											
 										<div class="form-group1">
 											<br>
 											<input type="button" class="btn btn-primary" value="Отправить" 
