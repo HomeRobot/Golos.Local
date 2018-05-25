@@ -1,4 +1,11 @@
-
+if(localStorage.getItem('node'))
+{
+	golos.config.set('websocket', localStorage.getItem('node'));
+}
+else
+{
+	golos.config.set('websocket','wss://ws.golos.io/');
+}
 var globalVars = new Object();
 var article = new Object();
 var user = new Object();
@@ -201,7 +208,15 @@ function AddBlockX(operation)
 {
 	var listWrapper = document.getElementById('items_list_wrapper');
 	var main_div = document.createElement("div");
-	main_div.classList.add("col-xs-12","q_wrapper");
+	if(localStorage.getItem('open') == 'true')
+	{
+		main_div.classList.add("col-xs-6","r_wrapper");
+	}
+	else
+	{
+		main_div.classList.add("col-xs-12","q_wrapper");
+	}
+	
 	var metadata = JSON.parse(operation.json_metadata);
 	if(metadata.image)
 	{
@@ -209,7 +224,7 @@ function AddBlockX(operation)
 	}
 	else
 	{
-		var image = '/components/com_q/noimage.png';
+		var image = 'images/noimage.png';
 	}
 	var img_div = document.createElement("div");
 	img_div.classList.add("img_div");
@@ -261,9 +276,18 @@ function AddBlockX(operation)
 	var d1 = moment(created);// new Date(created);
 	var d2 = moment(operation.cashout_time);//new Date(operation.cashout_time);
 	var dco = d2.diff(d1, 'hours');
-	//var dco = getCommentDate();
-	var s = 'onClick="getContentX(\''+operation.permlink.trim() +'\', \''+operation.author.trim() +'\');"';
-	q_div.innerHTML = '<div class="q_header_wrapper"><h3><a href="javascript:void(0)" '+s+'>'+ title + '</a></h3></div>' +  dt +' - Автор: <a href="user.html?author='+ author +'" title="Все посты пользователя">@' + author + '</a>' + '<br/> Голосов <strong>' + votes + '</strong> на сумму <strong>' + vl + '</strong><br/>' + tags;
+	if(localStorage.getItem('open') == 'true')
+	{
+		var s = '';
+		var h = 'show.html?permlink='+operation.permlink.trim() +'&author='+operation.author.trim();
+	}
+	else
+	{
+		var s = 'onClick="getContentX(\''+operation.permlink.trim() +'\', \''+operation.author.trim() +'\');"';
+		var h = 'javascript:void(0)';
+	}
+	
+	q_div.innerHTML = '<div class="q_header_wrapper"><h3><a href="'+h+'" '+s+'>'+ title + '</a></h3></div>' +  dt +' - Автор: <a href="user.html?author='+ author +'" title="Все посты пользователя">@' + author + '</a>' + '<br/> Голосов <strong>' + votes + '</strong> на сумму <strong>' + vl + '</strong><br/>' + tags;
 	
 	var clearFix = document.createElement("div");
 	clearFix.classList.add("clearFix");
@@ -493,6 +517,13 @@ function processImages(text)
 
 }
 
+function prepareContent(text)
+{
+	var p1 = "/<img src=['|\"]([\w\:\/\.]+)+['|\"][ \S]*>/i"; 
+	text.replace(p1, "");
+	var p2 = "/(http[s]*:\/\/[\S\.\/]+(jpg|jpeg|tiff|gif|png))/i";	
+}
+
 function getContentX(permlink, author)
 {
 	article.permlink = permlink;
@@ -507,7 +538,10 @@ function getContentX(permlink, author)
 		document.getElementById('vote_form').style = 'display: none';
 	}
 	
-	document.getElementById('content_loader').style = 'display:block';
+	if(document.getElementById('content_loader'))
+	{
+		document.getElementById('content_loader').style = 'display:block';
+	}	
 	
 	if(document.getElementById('answers_loader'))
 	{
@@ -517,7 +551,12 @@ function getContentX(permlink, author)
 	golos.api.getContent(author, permlink, function(err, data){
 		//console.log( data );
 		var metadata = JSON.parse(data.json_metadata);
-		document.getElementById('content_loader').style = 'display:none'; 
+		console.log(metadata);
+		if(document.getElementById('content_loader'))
+		{
+			document.getElementById('content_loader').style = 'display:none'; 
+			document.getElementById('loader').style = 'display:none'; 
+		}
 		var result = data;
 		marked.setOptions({
 		  renderer: new marked.Renderer(),
@@ -580,7 +619,7 @@ function getContentX(permlink, author)
 		}
 		
 		var header = document.createElement("div");
-		header.innerHTML = "<h1>"+result.title+"<br><small>"+dt+" Автор - <a href='user.html?author="+ author +"' title='Все посты пользователя'>@"+result.author+"</a> "+ follow + "</small></h1>" + '<p class="help-text">Голосов <strong>'+result.active_votes.length+'</strong> на сумму <strong>'+vl+'</strong>  выплата '+getCommentDate(result.cashout_time)+'</p>';
+		header.innerHTML = "<h1><a href='show.html?author="+ author +"&permlink="+ permlink +"'>"+result.title+"</a><br><small>"+dt+" Автор - <a href='user.html?author="+ author +"' title='Все посты пользователя'>@"+result.author+"</a> "+ follow + "</small></h1>" + '<p class="help-text">Голосов <strong>'+result.active_votes.length+'</strong> на сумму <strong>'+vl+'</strong>  выплата '+getCommentDate(result.cashout_time)+'</p>';
 		
 		var ava = document.createElement("div");
 		ava.style.float = 'left';
@@ -652,7 +691,7 @@ function getContentX(permlink, author)
 		{
 			var s = '';
 			data.forEach(function(operation){
-				s = s + "<a href='/@"+operation.voter+"' title='"+operation.percent / 100 +"%'>@"+operation.voter+"</a> ";
+				s = s + "<a href='user.html?author="+operation.voter+"' title='"+operation.percent / 100 +"%'>@"+operation.voter+"</a> ";
 			});
 			document.getElementById('voters').innerHTML = '<hr><div>Оценили ('+data.length+'): <span class="tt" onclick="spoiler(\'all_votes\'); return false">показать</span> <span id="all_votes" class="terms" style="display: none;"><small>' + s + '</small></span></div>';
 		}
@@ -669,7 +708,7 @@ function updateVotes(permlink, author)
 			{
 				var s = '';
 				data.forEach(function(operation){
-					s = s + "<a href='/@"+operation.voter+"' title='"+operation.percent / 100 +"%'>@"+operation.voter+"</a> ";
+					s = s + "<a href='user.html?author="+operation.voter+"' title='"+operation.percent / 100 +"%'>@"+operation.voter+"</a> ";
 				});
 				document.getElementById('voters').innerHTML = '<hr><div>Оценили ('+data.length+'): <span class="tt" onclick="spoiler(\'all_votes\'); return false">показать</span> <span id="all_votes" class="terms" style="display: none;"><small>' + s + '</small></span></div>';
 			}
@@ -756,7 +795,7 @@ function addComentX(operation)
 	var ava = document.createElement("div");
 	ava.style.float = 'left';
 		
-	header.innerHTML = "<div><h3>"+operation.title+" <small>"+dt+" Автор - <a href='/@"+operation.author+"' title='Все посты пользователя'>@"+operation.author+"</a></small></h3>" + '<p class="help-text"> Голосов '+operation.active_votes.length+' на сумму <strong>'+vl+'</strong></p></div>'; 
+	header.innerHTML = "<div><h3>"+operation.title+" <small>"+dt+" Автор - <a href='user.html?author="+operation.author+"' title='Все посты пользователя'>@"+operation.author+"</a></small></h3>" + '<p class="help-text"> Голосов '+operation.active_votes.length+' на сумму <strong>'+vl+'</strong></p></div>'; 
 	main_div.appendChild(header);
 	header.appendChild(ava);
 		
@@ -955,28 +994,35 @@ function loadUserCard(login)
 
 function Init()
 {
-	if(isLoggedIn())
-	{
-		user.login = localStorage.getItem('login');
-		//loadUserCard(user.login);
-		//getAllFollowers(user.login, true);
-		//getAllFollowing(user.login, true);
-	}
 	if(!isLoggedIn())
 	{
-		jQuery('#login_div').style = 'display:block;';
-		jQuery('#feed').style = 'display:none;';
-		jQuery('#blog').style = 'display:none;';
-		jQuery('#post').style = 'display:none;';
-		jQuery('#answer').style = 'display:none;';
+		jQuery('#login_div').show();
+		jQuery('#feed').hide();
+		jQuery('#blog').hide();
+		jQuery('#post').hide();
+		jQuery('#answer').hide();
+		jQuery('#exit').hide();
+		jQuery('#options').hide();
 	}	
 	else
 	{
-		jQuery('#login_div').style = 'display:none;';
+		user.login = localStorage.getItem('login');
+		jQuery('#login_div').hide();
 		jQuery('#hello').html('Привет, @' + user.login);
 		getUserPower(user.login);
-	}
 		
+		//check options
+		if(localStorage.getItem('open') == 'true')
+		{
+			jQuery('#x7').hide();
+			document.getElementById('x5').classList.remove('col-lg-5');
+			document.getElementById('x5').classList.add('col-lg-12');
+		}
+	}
+	//jQuery('#items_list_wrapper').height = window.heigh - 120;	
+	document.getElementById("items_list_wrapper").style.maxHeight = jQuery(window).height() - 120;
+	document.getElementById("items_list_wrapper").height = jQuery(window).height() - 120;
+	console.log(document.getElementById("items_list_wrapper"));
 }
 
 function checkLogin(login)
@@ -1042,10 +1088,9 @@ function isKyr(str) {
     return /[а-яё]/i.test(str);
 }
 
-
 function postBlog(title, tags)
 {
-	//console.log(title, tags, editor.getMarkdown());
+	var image = jQuery('#image').val();
 	var key = getPostingKey();
 	if(!key)
 	{
@@ -1091,6 +1136,13 @@ function postBlog(title, tags)
 	var new_permlink = title;
 	new_permlink = new_permlink.replace(/\s+/g,"-");	
 	
+	var img = '';
+	
+	if(image)
+	{
+		img = ', "image": ["'+image+'"]';
+	}
+	
 	var uniq = Math.round(new Date().getTime() / 1000);
 	new_permlink = detransliterate(new_permlink, 1).toLowerCase() + '-' + uniq;
 	new_permlink = new_permlink.replace(/[^a-z0-9 -]/g, "").trim();
@@ -1102,7 +1154,7 @@ function postBlog(title, tags)
 			new_permlink,
 			title.trim(),
 			editor.getMarkdown().trim(),
-			'{"tags":["'+tags+'"], "app": "golos.today", "format": "md"}',
+			'{"tags":["'+tags+'"], "app": "golos.today", "format": "markdown"'+img+'}',
 			function(err, result) {
 				if(err)
 				{
@@ -1116,4 +1168,41 @@ function postBlog(title, tags)
 				}
 	
 			});	
+}
+
+function loadOptions()
+{
+	if(localStorage.getItem('open') == 'true')
+	{
+		document.getElementById('open').checked = true;
+	}
+	else
+	{
+		document.getElementById('open').checked = false;
+	}
+	if(localStorage.getItem('node'))
+	{
+		document.getElementById('node').value = localStorage.getItem('node');
+	}
+}
+
+function saveOptions()
+{
+	if(document.getElementById('open').checked)
+	{
+		localStorage.setItem('open', true);
+	}
+	else
+	{
+		localStorage.setItem('open', false);
+	}
+	if(document.getElementById('node').value != '')
+	{
+		localStorage.setItem('node', document.getElementById('node').value);
+	}
+	else
+	{
+		localStorage.setItem('node', 'wss://ws.golos.io/');
+	}
+	alert('Настройки сохранены');
 }
