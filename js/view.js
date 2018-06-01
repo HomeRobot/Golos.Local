@@ -229,7 +229,15 @@ function AddBlockX(operation)
 	var img_div = document.createElement("div");
 	img_div.classList.add("img_div");
 	main_div.appendChild(img_div);
-	img_div.style.backgroundImage = "url('"+image+"')";
+	if(image == undefined || image == 'images/noimage.png')
+	{
+		img_div.style.backgroundImage = "url('images/noimage.png')";
+	}
+	else
+	{
+		img_div.style.backgroundImage = "url('https://imgp.golos.io/256x256/"+image+"')";
+	}
+	
 	
 	var q_div = document.createElement("div");
 	q_div.classList.add("q_div");
@@ -250,15 +258,9 @@ function AddBlockX(operation)
 	{
 		vl = total_payout_value;
 	}
-	
-	/*var replies = 0;
-	golos.api.getContentReplies(operation.author, operation.permlink, function(err, result) {
-		//console.log(err, result);
-		replies = result.length;		
-	});*/
 
 	var tags = '';
-	if(typeof metadata.tags !== "undefined")
+	if(typeof metadata.tags !== undefined)
 	{
 		var tags_count = metadata.tags.length;
 		
@@ -497,31 +499,13 @@ function getDiscussionsByFeed(login, start_author, start_permlink)
 	});	
 }
 
-function processImages(text)
-{
-	const pattern = /(https?:\/\/.*\.(?:png|jpg|jpeg|gif))/i
-	var dtxt = text;
-	
-	const renderImage = url => {
-		dtxt = dtxt.replace(url, "<img src='"+url+"'>");
-	}
-	
-	 text
-      .split(' ')
-      .map(word => word.match(pattern))
-      .filter(matched => !!matched)
-      .map(matched => matched[0])
-      .forEach(renderImage);
-	  
-	return dtxt;  
-
-}
-
-function prepareContent(text)
-{
-	var p1 = "/<img src=['|\"]([\w\:\/\.]+)+['|\"][ \S]*>/i"; 
-	text.replace(p1, "");
-	var p2 = "/(http[s]*:\/\/[\S\.\/]+(jpg|jpeg|tiff|gif|png))/i";	
+function prepareContent(text) {
+	return text.replace(/[^=][^""][^"=\/](https?:\/\/[^" <>\n]+)/gi, data => {
+	const link = data.slice(3);
+	  if(/(jpe?g|png|svg|gif)$/.test(link)) return `${data.slice(0,3)} <img src="${link}" alt="" /> `
+	  if(/(youtu|vimeo)/.test(link)) return (`${data.slice(0,3)} <iframe src="${link}" frameborder="0" allowfullscreen></iframe> `).replace('watch', 'embed');
+	  return `${data.slice(0,3)} <a href="${link}">${link}</a> `
+	}).replace(/ (@[^< \.,]+)/gi, user => ` <a href="user.html?author=${user.trim().slice(1)}">${user.trim()}</a>`)
 }
 
 function getContentX(permlink, author)
@@ -570,19 +554,19 @@ function getContentX(permlink, author)
 		});
 		article.text = result.body;
 		var main_div = document.getElementById('qq');
-		var re = /https:\/\/golos.io/gi;
+		/*var re = /https:\/\/golos.io/gi;
 		var newbody = result.body.replace(re, 'https://golos.today');
 		var re = /https:\/\/golos.blog/gi;
 		var newbody = newbody.replace(re, 'https://golos.today');
 		var re = /https:\/\/goldvoice.club/gi;
-		var newbody = newbody.replace(re, 'https://golos.today');
-		if(metadata.format == 'markdown')
-		{
-			main_div.innerHTML = marked(newbody);
-		}
-		else{
-			main_div.innerHTML = marked(newbody);
-		}
+		var newbody = newbody.replace(re, 'https://golos.today');*/
+		var newbody = marked(result.body);
+	//	console.log(newbody);
+		newbody = prepareContent(newbody);
+		
+
+		main_div.innerHTML = newbody;
+
 		var date = new Date(result.created);
 		var offset = date.getTimezoneOffset();
 		date.setMinutes(date.getMinutes() - offset); 
@@ -636,7 +620,11 @@ function getContentX(permlink, author)
 		}
 		  
 		golos.api.getAccounts([author], function(err, response){
-			console.log(err);
+			if(err)
+			{
+				console.log(err);
+			}
+			
 			if(response)
 			{
 				var ava = document.getElementById("ava");
@@ -645,9 +633,9 @@ function getContentX(permlink, author)
 					var metadata = JSON.parse(response[0].json_metadata);
 					if(metadata.profile != 'undefined')
 					{
-						if(metadata.profile.profile_image != 'undefined')
+						if(metadata.profile.profile_image != undefined)
 						{
-							ava.style.backgroundImage = "url('"+metadata.profile.profile_image+"')";
+							ava.style.backgroundImage = "url('https://imgp.golos.io/256x256/"+metadata.profile.profile_image+"')";
 							
 						}else{
 							ava.style.backgroundImage = "url('images/ninja.png')";
@@ -823,15 +811,16 @@ function addComentX(operation)
 		//console.log(err, response);
 		if(response)
 		{
-			if(response[0].json_metadata != 'undefined' && response[0].json_metadata != '{}' && response[0].json_metadata != '')
+			if(response[0].json_metadata != undefined && response[0].json_metadata != '{}' && response[0].json_metadata != '')
 			{
 				var metadata = JSON.parse(response[0].json_metadata);
-				if(metadata.profile != 'undefined')
+				console.log(metadata.profile.profile_image);
+				if(metadata.profile != undefined && metadata.profile != null)
 				{
-					if(metadata.profile.profile_image != 'undefined')
+					if(metadata.profile.profile_image != undefined && metadata.profile.profile_image != null)
 					{
 						//var ava = document.getElementById("ava");
-						ava.style.backgroundImage = "url('"+metadata.profile.profile_image+"')";
+						ava.style.backgroundImage = "url('https://imgp.golos.io/256x256/"+metadata.profile.profile_image+"')";
 						ava.classList.add('ava_div');
 					}else{
 						ava.style.backgroundImage = "url('images/ninja.png')";
@@ -939,9 +928,10 @@ function sendComment(permlink, author, txt_id, button, hide)
 				}
 				if(err)
 				{
+					console.log( err.payload.error.message);
 					//if(err.i.payload.data.code == 10)
 					{
-						alert('Вы можете публиковать один комментарий в 20 секунд.');
+						alert('Ошибка при публикации. ' + err.payload.error.message);
 					}
 				}				
 			});			 
@@ -970,7 +960,7 @@ function loadUserCard(login)
 				{
 					if(metadata.profile.profile_image != 'undefined')
 					{
-						ava.style.backgroundImage = "url('"+metadata.profile.profile_image+"')";
+						ava.style.backgroundImage = "url('https://imgp.golos.io/256x256/"+metadata.profile.profile_image+"')";
 						
 					}else{
 						ava.style.backgroundImage = "url('images/logo.png')";
@@ -1020,9 +1010,9 @@ function Init()
 		}
 	}
 	//jQuery('#items_list_wrapper').height = window.heigh - 120;	
-	document.getElementById("items_list_wrapper").style.maxHeight = jQuery(window).height() - 120;
-	document.getElementById("items_list_wrapper").height = jQuery(window).height() - 120;
-	console.log(document.getElementById("items_list_wrapper"));
+	//document.getElementById("items_list_wrapper").style.maxHeight = jQuery(window).height() - 120;
+	//document.getElementById("items_list_wrapper").height = jQuery(window).height() - 120;
+	//console.log(document.getElementById("items_list_wrapper"));
 }
 
 function checkLogin(login)
@@ -1159,7 +1149,7 @@ function postBlog(title, tags)
 				if(err)
 				{
 					console.log(err);
-					alert('Произошла ошибка при публикации. Смотрите подробнее в консоли разработчика');
+					alert('Произошла ошибка при публикации. ' + err.payload.error.message);
 					return;
 				}
 				if(result)
