@@ -503,7 +503,7 @@ function prepareContent(text) {
 	return text.replace(/[^=][^""][^"=\/](https?:\/\/[^" <>\n]+)/gi, data => {
 	const link = data.slice(3);
 	  if(/(jpe?g|png|svg|gif)$/.test(link)) return `${data.slice(0,3)} <img src="${link}" alt="" /> `
-	  if(/(youtu|vimeo)/.test(link)) return (`${data.slice(0,3)} <iframe src="${link}" frameborder="0" allowfullscreen></iframe> `).replace('watch', 'embed');
+	  if(/(youtu|vimeo)/.test(link)) return `${data.slice(0,3)} <iframe src="${link}" frameborder="0" allowfullscreen></iframe> `;
 	  return `${data.slice(0,3)} <a href="${link}">${link}</a> `
 	}).replace(/ (@[^< \.,]+)/gi, user => ` <a href="user.html?author=${user.trim().slice(1)}">${user.trim()}</a>`)
 }
@@ -532,7 +532,7 @@ function getContentX(permlink, author)
 		document.getElementById('answers_loader').style = 'display:block';
 	}
 	
-	golos.api.getContent(author, permlink, function(err, data){
+	golos.api.getContent(author, permlink, -1, function(err, data){
 		//console.log( data );
 		var metadata = JSON.parse(data.json_metadata);
 		console.log(metadata);
@@ -654,7 +654,7 @@ function getContentX(permlink, author)
 		});  
 	});
 	
-	golos.api.getContentReplies(author, permlink, function(err, data){
+	golos.api.getContentReplies(author, permlink, -1, function(err, data){
 		if(data.length > 0)
 		{
 			data.forEach(function(operation){
@@ -673,7 +673,7 @@ function getContentX(permlink, author)
 	var voter = localStorage.getItem('login');
 	isVoted(permlink, author, voter);
 	
-	golos.api.getActiveVotes(author, permlink, function(err, data){
+	golos.api.getActiveVotes(author, permlink, -1, function(err, data){
 	if(data)
 		if(data.length > 0)
 		{
@@ -690,7 +690,7 @@ function getContentX(permlink, author)
 function updateVotes(permlink, author)
 {
 	removeChildrenRecursively(document.getElementById('voters'));
-	golos.api.getActiveVotes(author, permlink, function(err, data){
+	golos.api.getActiveVotes(author, permlink, -1, function(err, data){
 		if(data)
 			if(data.length > 0)
 			{
@@ -747,7 +747,7 @@ function isVoted(permlink, author, voter)
 	if(document.getElementById('my_vote'))
 	{
 		document.getElementById('my_vote').innerHTML = '';
-		golos.api.getActiveVotes(author, permlink, function(err, data){
+		golos.api.getActiveVotes(author, permlink, -1, function(err, data){
 			if(data)
 				if(data.length > 0)
 				{
